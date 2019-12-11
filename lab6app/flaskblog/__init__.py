@@ -1,14 +1,15 @@
-from flask import Flask 
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
+from flask_admin import Admin
 import os
+from flask_restful import Api, Resource
 
-app  = Flask(__name__)
-app.config['SECRET_KEY'] = 'Thisisasecret!' 
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app = Flask(__name__)
+app.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'site.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -20,5 +21,21 @@ login_manager.login_message_category = 'info'
 migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
+
+
+import flaskblog.routes as r
+api = Api(app)
+api.add_resource(r.HelloWorld, '/api')
+api.add_resource(r.Multi, '/multi/<int:num>')
+
+
+
+import flaskblog.forms as views
+admin = Admin(app)
+#admin.add_view(views.HelloView(name='Hello'))
+
+from flask_admin.contrib.sqla import ModelView
+#admin.add_view(ModelView(views.User, db.session))
+admin.add_view(views.UserAdminView(views.User, db.session))
 
 from flaskblog import routes
