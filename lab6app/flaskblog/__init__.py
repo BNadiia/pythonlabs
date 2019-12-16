@@ -34,7 +34,7 @@ import flaskblog.forms as views
 admin = Admin(app)
 #admin.add_view(views.HelloView(name='Hello'))
 
-from flask_admin.contrib.sqla import ModelView
+#from flask_admin.contrib.sqla import ModelView
 #admin.add_view(ModelView(views.User, db.session))
 admin.add_view(views.UserAdminView(views.User, db.session))
 

@@ -6,10 +6,9 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationE
 from flaskblog.models import User, CKTextAreaField
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.actions import ActionsMixin
-from flask_admin import BaseView, expose, AdminIndexView
 from flask_admin.form import rules
 from flaskblog import bcrypt
-from flask_ckeditor import CKEditor, CKEditorField
+
 
 
 class RegistrationForm(FlaskForm):
@@ -22,7 +21,7 @@ class RegistrationForm(FlaskForm):
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user:
-            raise ValidationError('That username is taken. Please choose a differrent one')
+            raise ValidationError('That username is taken. Please choose a different one')
 
     def validate_email(self, email):
         if User.query.filter_by(email=email.data).first():
@@ -41,9 +40,9 @@ class UpdateAccountForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     about_me = TextAreaField('About Me')
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
-    old_pass = PasswordField('Old password', validators=[DataRequired()])
-    new_pass = PasswordField('New password', validators=[DataRequired()])
-    confirm_pass = PasswordField('Confirm password', validators=[DataRequired(), EqualTo('new_pass')])
+    old_pass = PasswordField('Old password')
+    new_pass = PasswordField('New password')
+    confirm_pass = PasswordField('Confirm password', validators=[EqualTo('new_pass')])
     submit = SubmitField('Update')
 
     def validate_username(self, username):

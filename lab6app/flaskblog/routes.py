@@ -15,6 +15,8 @@ from datetime import datetime
 # from wtforms import PasswordField
 from functools import wraps
 from flask_restful import Resource
+import uuid
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 def make_sure_path_exists(path):
@@ -325,11 +327,9 @@ def index():
         return jsonify({'you sent': some_json}), 201
     else:
         return jsonify({"about":"Hello World!"})
-
 @app.route('/multi/<int:num>', methods=['GET'])
 def get_multiply10(num):
     return  jsonify({'result': num * 10})
-
 '''
 
 class HelloWorld(Resource):
@@ -345,4 +345,69 @@ class Multi(Resource):
     def get(self, num):
         return {'result': num * 10}
 
+
+#####################################################################################
+
+@app.route('/user', methods = ['GET'])
+def get_all_users():
+
+    users = User.query.all()
+
+    output = []
+
+    for user in users:
+        user_data = {}
+        user_data['id'] = user.id
+        user_data['name'] = user.username
+        user_data['password'] = user.password
+        user_data['admin'] = user.admin
+        output.append(user_data)
+    return jsonify({'user': output})
+
+
+@app.route('/user/<user_id>', methods = ['GET'])
+def get_one_user():
+    user = User.query.filter_by(id=id).first()
+    if not user:
+        return jsonify({'message': 'No user found!'})
+    user_data ={}
+    user_data['id'] = user.id
+    user_data['username'] = user.username
+    user_data['password'] = user.password
+    user_data['admin'] = user.admin
+
+    return jsonify({'user': user_data})
+
+@app.route('/user', methods = ['POST'])
+def create_user():
+    data = request.get_json()
+
+    hashed_password = generate_password_hash(data['password'], method='sha256')
+
+    new_user = User(id=int(uuid.uuid4()), name=data['name'], password=hashed_password, admin=False)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({'message': 'New user created!'})
+
+
+
+@app.route('/user/<user_id>', methods = ['PUT'])
+def promote_user():
+    user = User.query.filter_by(id=id).first()
+    if not user:
+        return jsonify({'message': 'No user found!'})
+    user.admin = True
+    db.session.commit()
+    return jsonify({'message': 'User has been promoted!'})
+
+
+@app.route('/user/<user_id>', methods = ['DELETE'])
+def delete_user():
+    user = User.query.filter_by(id=id).first()
+    if not user:
+        return jsonify({'message': 'No user found!'})
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({'message': 'The user has been deleted!'})
 
